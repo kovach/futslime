@@ -7,14 +7,16 @@ def rand (rng_state : i64) : f32 =
     let rng_state = (f32.u32 (rng_state % 1000) / 1000f32)
     in rng_state
 
+-- maybe useful in the repl to iterate `update`
+def iter 'a n (f : a -> a) a : a = foldl (\a _ -> f a) a (iota n)
+
 type angle = f32
 type slime = {x: f32, y: f32, theta: angle}
 type slimes[ns] = [ns]slime
 type signals [m][n] = [n][m]f32
 type state [ns][m][n] = (slimes[ns], signals[m][n])
 type params = {eps: f32, r: f32, inertia: f32, decay: f32, drop_rate: f32, diffuse: f32}
-
-def iter 'a n (f : a -> a) a : a = foldl (\a _ -> f a) a (iota n)
+def signal_limit : f32 = 2
 
 def diffuse [m][n] v (d : [n][m]f32) : [][]f32 =
   let f = (1-v)/8
@@ -27,8 +29,6 @@ def diffuse [m][n] v (d : [n][m]f32) : [][]f32 =
 
 -- python issue?
 def to (n : i64) (f : f32) = i64.f32 ((1 + (f % 1)) % 1 * f32.i64 n)
-
-def signal_limit : f32 = 2
 
 def slime_step (s : slime) (dtheta : angle) (r : f32) : slime =
   let theta = s.theta + dtheta in
@@ -135,5 +135,5 @@ def run p (ns : i64) m n k =
 entry main eps r inertia drop_rate decay diffuse ns m n k =
   let frames = run {eps, r, inertia, decay, drop_rate, diffuse} ns m n k
   let max = f32.maximum (flatten_3d frames)
-  let frames = map (\f -> map (\r -> map (\v -> u8.f32 (255 * v / max)) r) f) frames
+  let frames = map (map (map (\v -> u8.f32 (255 * v / max)))) frames
   in frames
