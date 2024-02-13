@@ -136,7 +136,9 @@ def gen_rect signals k : []slime =
   tabulate k (\i ->
     let x = rand i
     let y = rand (i << 6)
-    let phi = 6.28 * rand (i << 12)
+    let phi = 0 -- 6.28 * rand (i << 12)
+    --let phi = f32.pi/2 + f32.atan2 (((-x)-0.5)/(y-0.5))
+    let phi = f32.atan2 (y-0.5) (x-0.5)
     let s = { x, y, theta = phi, color = color_zero }
     in {x = s.x, y = s.y, theta = s.theta, color = sig_lookup signals s})
 
